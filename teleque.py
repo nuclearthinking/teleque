@@ -5,6 +5,7 @@ import random
 import threading
 import uuid
 from datetime import timedelta
+from logging import DEBUG
 from typing import List
 
 import time
@@ -54,8 +55,7 @@ date = datetime.date.today()
 now_time = datetime.datetime.now()
 log_file_name = f"bot_{date}_{now_time.hour}-{now_time.minute}-{now_time.second}.log"
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    filename='/'.join(['logs', log_file_name]), level=99)
-# logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+                    filename='/'.join(['logs', log_file_name]), level=DEBUG)
 logger = logging.getLogger(__name__)
 logger.isEnabledFor(99)
 
@@ -175,7 +175,7 @@ def process_publication():
             logger.log(99, f'Exception occured while publishing {publication}, {e}')
 
 
-def publication_loop():
+def publication_loop(interval):
     logger.log(99, 'Starting publication loop')
     publication_time = _round_publication_date(datetime.datetime.now())
     logger.log(99, f'Next publication time {publication_time}')
@@ -190,7 +190,7 @@ def publication_loop():
 def start_publications():
     if Publication.select().where(Publication.published == False).exists():
         publication_queue.extend(Publication.select().where(Publication.published == False).iterator())
-    logger.log(99,'Starting publication thread')
+    logger.log(99, 'Starting publication thread')
     publication_thread = threading.Thread(target=publication_loop, args=(10,))
     publication_thread.setName("publication")
     publication_thread.daemon = True
