@@ -31,6 +31,7 @@ start_message = "Доступные команды\n/queue - отображае�
 token = get_setting('token')
 publication_interval = get_setting('publication_interval')
 publication_chanel = get_setting('publication_chanel')
+admins = get_setting('admin_users')
 
 db = SqliteDatabase('teleque.db')
 
@@ -199,12 +200,15 @@ def start_publications():
 
 def main():
     db.create_tables([Publication], safe=True)
+
+    commands_filter = Filters.private & Filters.command & Filters.user(username=admins)
+    photo_filter = Filters.private & Filters.photo & Filters.user(username=admins)
     handlers = [
-        CommandHandler('start', start, filters=Filters.private),
-        CommandHandler('queue', queue, filters=Filters.private),
-        CommandHandler('interval', interval, filters=Filters.private),
-        CommandHandler('setinterval', set_interval, filters=Filters.private),
-        MessageHandler(filters=Filters.photo | Filters.private, callback=save_photo)
+        CommandHandler('start', start, filters=commands_filter),
+        CommandHandler('queue', queue, filters=commands_filter),
+        CommandHandler('interval', interval, filters=commands_filter),
+        CommandHandler('setinterval', set_interval, filters=commands_filter),
+        MessageHandler(filters=photo_filter, callback=save_photo)
     ]
 
     updater = Updater(token)
