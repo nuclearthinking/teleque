@@ -51,7 +51,7 @@ class Publication(Model):
 publication_queue: List[Publication] = []
 
 # logging
-os.mkdir('logs') if not os.path.exists('logs') else None
+None if os.path.exists('logs') else os.mkdir('logs')
 date = datetime.date.today()
 now_time = datetime.datetime.now()
 log_file_name = f"bot_{date}_{now_time.hour}-{now_time.minute}-{now_time.second}.log"
@@ -86,8 +86,7 @@ def interval(bot: Bot, update: Update):
 def set_interval(bot: Bot, update: Update):
     global publication_interval
     command = update.effective_message.text
-    trimmed_command = command.replace('/setinterval', '').strip()
-    if trimmed_command:
+    if trimmed_command := command.replace('/setinterval', '').strip():
         try:
             publication_interval = int(trimmed_command)
             bot.send_message(
@@ -120,10 +119,9 @@ def _save_file(file_id):
         file_name = f'{"".join(image_identifier.split("-")[1:])}.jpg'
         file_path = os.path.normpath(os.path.join(sub_dir_path, file_name))
         if not os.path.exists(file_path):
-            file = open(file=file_path, mode='wb')
-            image = bot.get_file(file_id=file_id)
-            image.download(out=file)
-            file.close()
+            with open(file=file_path, mode='wb') as file:
+                image = bot.get_file(file_id=file_id)
+                image.download(out=file)
             break
         else:
             continue
